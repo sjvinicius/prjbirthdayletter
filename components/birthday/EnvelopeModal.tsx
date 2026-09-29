@@ -14,6 +14,7 @@ type EnvelopeModalProps = {
   letter: OpenLetter | null
   birthdayName: string
   specialMessage: string
+  supabaseUrl: string | null
   onClose: () => void
 }
 
@@ -21,12 +22,15 @@ export function EnvelopeModal({
   letter,
   birthdayName,
   specialMessage,
+  supabaseUrl,
   onClose,
 }: EnvelopeModalProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const message = letter?.kind === 'message' ? letter.message : null
   const isSpecial = letter?.kind === 'special'
-  const photoUrl = message?.photo_path ? getPublicPhotoUrl(message.photo_path) : null
+  const photoUrl = message?.photo_path
+    ? getPublicPhotoUrl(message.photo_path, supabaseUrl)
+    : null
 
   useEffect(() => {
     if (!letter) return

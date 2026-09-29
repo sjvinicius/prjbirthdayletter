@@ -6,12 +6,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CreateEnvelope } from '@/components/birthday/CreateEnvelope'
 import { EnvelopeCard } from '@/components/birthday/EnvelopeCard'
 import { EnvelopeModal, type OpenLetter } from '@/components/birthday/EnvelopeModal'
+import { PhotoLightbox } from '@/components/birthday/PhotoLightbox'
 import { getPublicPhotoUrl } from '@/lib/supabase/photos'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import type { BirthdayMessage, BirthdayStats } from '@/types/birthday'
 
 type BirthdayExperienceProps = {
   initialMessages: BirthdayMessage[]
+  supabaseUrl: string | null
   stats: BirthdayStats
   birthdayName: string
   specialMessage: string
@@ -22,6 +24,7 @@ type BirthdayExperienceProps = {
 
 export function BirthdayExperience({
   initialMessages,
+  supabaseUrl,
   stats,
   birthdayName,
   specialMessage,
@@ -32,6 +35,7 @@ export function BirthdayExperience({
   const [messages, setMessages] = useState(initialMessages)
   const [liveStats, setLiveStats] = useState(stats)
   const [openLetter, setOpenLetter] = useState<OpenLetter | null>(null)
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null)
   const [notice, setNotice] = useState('')
   const [realtimeConnected, setRealtimeConnected] = useState(false)
   const knownMessageIds = useRef(new Set(initialMessages.map((message) => message.id)))
@@ -39,6 +43,7 @@ export function BirthdayExperience({
   const photos = messages.filter((message) => message.photo_path).slice(0, 12)
 
   const closeLetter = useCallback(() => setOpenLetter(null), [])
+  const closePhotoLightbox = useCallback(() => setSelectedPhotoIndex(null), [])
 
   const acceptMessage = useCallback((message: BirthdayMessage) => {
     if (knownMessageIds.current.has(message.id)) return
@@ -185,7 +190,7 @@ export function BirthdayExperience({
           <div className="photo-wall">
             {photos.map((message, index) => {
               const photoUrl = message.photo_path
-                ? getPublicPhotoUrl(message.photo_path)
+                ? getPublicPhotoUrl(message.photo_path, supabaseUrl)
                 : null
               if (!photoUrl) return null
 
@@ -198,14 +203,23 @@ export function BirthdayExperience({
                   viewport={{ once: true, amount: 0.15 }}
                   transition={{ duration: 0.4, delay: Math.min(index * 0.04, 0.2) }}
                 >
-                  <Image
-                    src={photoUrl}
-                    alt={`Foto de aniversário enviada por ${message.name}`}
-                    width={520}
-                    height={420}
-                    sizes="(max-width: 640px) 44vw, (max-width: 1024px) 30vw, 22vw"
-                    className="photo-print-image"
-                  />
+                  <button
+                    className="photo-print-trigger"
+                    type="button"
+                    onClick={() => setSelectedPhotoIndex(index)}
+                    aria-label={`Ampliar foto enviada por ${message.name}`}
+                    title="Ampliar foto"
+                  >
+                    <Image
+                      src={photoUrl}
+                      alt=""
+                      width={520}
+                      height={420}
+                      sizes="(max-width: 640px) 44vw, (max-width: 1024px) 30vw, 22vw"
+                      className="photo-print-image"
+                    />
+                    <span className="photo-print-zoom" aria-hidden="true">↗</span>
+                  </button>
                   <figcaption>com carinho, {message.name}</figcaption>
                 </motion.figure>
               )
@@ -241,10 +255,20 @@ export function BirthdayExperience({
 
       <CreateEnvelope disabled={submissionUnavailable} onCreated={acceptMessage} />
 
+      {selectedPhotoIndex !== null && (
+        <PhotoLightbox
+          photos={photos}
+          initialIndex={selectedPhotoIndex}
+          supabaseUrl={supabaseUrl}
+          onClose={closePhotoLightbox}
+        />
+      )}
+
       <EnvelopeModal
         letter={openLetter}
         birthdayName={birthdayName}
         specialMessage={specialMessage}
+        supabaseUrl={supabaseUrl}
         onClose={closeLetter}
       />
 
