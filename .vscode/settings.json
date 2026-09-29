@@ -1,0 +1,9 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "npm audit": true,
+        "printf": true,
+        "command": true,
+        "true": true,
+        "npx tsc": true
+    }
+}
