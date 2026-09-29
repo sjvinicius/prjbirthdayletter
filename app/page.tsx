@@ -6,12 +6,12 @@ export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const data = await getBirthdayData()
-  const birthdayName = process.env.NEXT_PUBLIC_BIRTHDAY_NAME?.trim() || 'meu amor'
+  const birthdayName = process.env.NEXT_BIRTHDAY_NAME?.trim() || 'meu amor'
   const specialMessage = process.env.BIRTHDAY_SPECIAL_MESSAGE?.trim() || ''
   const heroStats = data.configurationMissing || data.hasError ? null : data.stats
   const submissionUnavailable = !(
-    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() &&
+    process.env.NEXT_SUPABASE_URL?.trim() &&
+    process.env.NEXT_SUPABASE_ANON_KEY?.trim() &&
     process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
   )
 

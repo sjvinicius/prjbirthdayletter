@@ -5,7 +5,7 @@ export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
 export default function OpenGraphImage() {
-  const name = process.env.NEXT_PUBLIC_BIRTHDAY_NAME?.trim() || 'meu amor'
+  const name = process.env.NEXT_BIRTHDAY_NAME?.trim() || 'meu amor'
 
   return new ImageResponse(
     (
